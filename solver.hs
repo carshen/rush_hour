@@ -1,6 +1,7 @@
 -- Rush Hour
 
 -- Takes the initial board and returns a list of boards, the path.
+-- Assumption: the board is at least a 3x2 matrix.
 rush_hour :: [String] -> [[String]]
 rush_hour init_state = solver [init_state] []
 
@@ -8,7 +9,7 @@ rush_hour init_state = solver [init_state] []
 solver :: [[String]] -> [[String]] -> [[String]]
 solver unexplored path
 	| null unexplored		= []
---	| Check we haven't visited this path. 
+	| elem (head unexplored) path	= solver (tail unexplored) path
 	| is_goal (head unexplored)	= ((head unexplored):path)
 	| (not (null result))		= result
 	| otherwise			= solver (tail unexplored) path
@@ -16,8 +17,34 @@ solver unexplored path
 	
 -- Checks if 'XX' present in last 2 columns of the 3rd row on the board.
 is_goal :: [String] -> Bool
-is_goal board = True
+is_goal board = (special_car_at_goal (get_row board 3) (length (head board)))
 
 -- Takes a board and generates a list of boards 1 move away.
 generate_moves :: [String] -> [[String]]
-generate_moves board = [board]
+generate_moves board = (generate_vertical_moves board) ++ (generate_horizontal_moves board)
+
+-- Takes a board and generates a list of boards where each board is a valid vertical move.
+generate_vertical_moves :: [String] -> [[String]]
+generate_vertical_moves board = [board]
+
+-- Takes a board and generates a list of boards where each board is a valid horizontal move.
+generate_horizontal_moves :: [String] -> [[String]]
+generate_horizontal_moves board = [board]
+
+-- Misc. helpers
+-- Return the nth row of the board.
+get_row :: [String] -> Int -> String
+get_row board n
+	| n==1		= (head board)
+	| otherwise	= (get_row (tail board) (n-1))
+
+-- Return True if there is a special car at the goal position in the given row of length n.
+special_car_at_goal :: String -> Int -> Bool
+special_car_at_goal row n
+	| (null (tail row))			= False
+	| n==2 && (special_car_at_head row)	= True
+	| otherwise				= special_car_at_goal (tail row) (n-1)
+	
+-- Return True if special car at the head of the list where list size >= 2.
+special_car_at_head :: String -> Bool
+special_car_at_head row = (head row)=='X' && (head (tail row))=='X'
