@@ -5,7 +5,7 @@
 -- But it will do the job for a 6x6 matrix.
 
 rush_hour :: [String] -> [[String]]
-rush_hour init_state = solver [init_state] []
+rush_hour init_state = reverse(solver [init_state] [])
 
 -- Takes a list of unexplored boards, and the list of boards experienced so far. 
 solver :: [[String]] -> [[String]] -> [[String]]
