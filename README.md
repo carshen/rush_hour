@@ -1,4 +1,4 @@
 rush_hour
 =========
 
-rush hour in haskell lol lol lol
+rush hour game in haskell with billy lin
