@@ -1,7 +1,9 @@
 -- Rush Hour
 
 -- Takes the initial board and returns a list of boards, the path.
--- Assumption: the board is at least a 3x2 matrix.
+-- Assumption: the board is at least a 3x2 matrix. Note we don't assume the board always has to be size 6,
+-- But it will do the job for a 6x6 matrix.
+
 rush_hour :: [String] -> [[String]]
 rush_hour init_state = solver [init_state] []
 
