@@ -33,6 +33,28 @@ generate_vertical_moves board = [board]
 generate_horizontal_moves :: [String] -> [[String]]
 generate_horizontal_moves board = [board]
 
+drop_last :: [a] -> [a]
+drop_last []			= []
+drop_last (x:xs)
+	| null xs			= []
+	| (null (tail xs))	= [x]
+	| otherwise			= x:(drop_last xs)
+	
+is_car :: Char -> Bool
+is_car '-'	= False
+is_car _	= True
+	
+pat3_match :: [Char] -> [[Char]]
+pat3_match arr = pat3_match_helper "" arr
+	
+pat3_match_helper :: [Char] -> [Char] -> [[Char]]
+pat3_match_helper _ [] = []
+pat3_match_helper beg (x:(y:z))
+	| null z	= []
+	| (x == y) &&(is_car x) && (is_car y) && (head z) == '-'	= (beg ++ (head z):(x:(y:(tail z)))) : (pat3_match_helper (beg ++ (x:(y:[(head z)]))) (tail z))
+	| otherwise = pat3_match_helper (beg ++ [x]) (y:z)
+pat3_match_helper _ _ = []
+
 -- Misc. helpers
 -- Return the nth row of the board.
 get_row :: [String] -> Int -> String
