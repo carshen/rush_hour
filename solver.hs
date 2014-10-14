@@ -1,3 +1,5 @@
+module Solver (pat3_match) where
+
 -- Rush Hour
 
 -- Takes the initial board and returns a list of boards, the path.
