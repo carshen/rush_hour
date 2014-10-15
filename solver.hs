@@ -34,78 +34,109 @@ generate_vertical_moves board = [board]
 -- Takes a board and generates a list of boards where each board is a valid horizontal move.
 generate_horizontal_moves :: [String] -> [[String]]
 generate_horizontal_moves board = [board]
-
-drop_last :: [a] -> [a]
-drop_last []			= []
-drop_last (x:xs)
-	| null xs			= []
-	| (null (tail xs))	= [x]
-	| otherwise			= x:(drop_last xs)
 	
+-- Is this a car/truck character?
 is_car :: Char -> Bool
 is_car '-'	= False
 is_car _	= True
 
+-- All the moves for one horizontal line
 moves_horiz :: [Char] -> [[Char]]
-moves_horiz chars = (moves_right chars)
--- ++ (moves_left chars)
+moves_horiz chars = (moves_right chars) ++ (moves_left chars)
+
+-- Do these 3 characters represent a car and a blank space?
+car_match :: Char -> Char -> Char -> Bool
+car_match c1 c2 blank = 
+			(c1 == c2) &&
+			(is_car c1) && (is_car c2) &&
+			blank == '-'
+			
+-- Do these 3 characters represent a truck and a blank space?
+truck_match :: Char -> Char -> Char -> Char -> Bool
+truck_match c1 c2 c3 blank = 
+			(c1 == c2) && (c2 == c3) &&
+			(is_car c1) && (is_car c2) && (is_car c3) &&
+			blank == '-'
 	
 --Get the possible moves to the right on one horizontal line
 -- "AA-" -> "-AA"
 moves_right :: [Char] -> [[Char]]
 moves_right arr = moves_helper
 		-- Car matching
-		(\ v w x ->
-			-- Check if first 2 are equal, cars, and 3rd is empty
-			(v == w) && (is_car v) && (is_car w) && x == '-'
+		(\ c1 c2 blank ->
+			car_match c1 c2 blank
 		)
 		-- Truck matching (should be done before car)
-		(\ v w x y ->
-			-- Check if first 2 are equal, cars, and 3rd is empty
-			(v == w) && (w == x) && (is_car v) && (is_car w) && (is_car x) && y == '-'
+		(\ c1 c2 c3 blank ->
+			truck_match c1 c2 c3 blank
 		)
 		-- Car generation
-		(\ v w x rest ->
-			-- Compose empty with the 2 car chars and the rest of the list
-			(x:(v:(w:rest)))
+		(\ c1 c2 blank rest ->
+			-- Compose blank, the 2 car chars, and the rest of the list
+			(blank:(c1:(c2:rest)))
 		)
 		-- Truck generation
-		(\ v w x y rest ->
-			-- Compose empty with the 3 car chars and the rest of the list
-			(y:(v:(w:(x:rest))))
+		(\ c1 c2 c3 blank rest ->
+			-- Compose blank, the 3 car chars, and the rest of the list
+			(blank:(c1:(c2:(c3:rest))))
+		)
+		""
+		arr
+		
+--Get the possible moves to the right on one horizontal line
+-- "AA-" -> "-AA"
+moves_left :: [Char] -> [[Char]]
+moves_left arr = moves_helper
+		-- Car matching
+		(\ blank c1 c2 ->
+			car_match c1 c2 blank
+		)
+		-- Truck matching (should be done before car)
+		(\ blank c1 c2 c3 ->
+			truck_match c1 c2 c3 blank
+		)
+		-- Car generation
+		(\ blank c1 c2 rest ->
+			-- Compose 2 car chars, blank, and the rest of the list
+			(c1:(c2:(blank:rest)))
+		)
+		-- Truck generation
+		(\ blank c1 c2 c3 rest ->
+			-- Compose 3 car chars, blank, and the rest of the list
+			(c1:(c2:(c3:(blank:rest))))
 		)
 		""
 		arr
 
 -- mf = matching function for car, truck_mf for truck
+-- gf = generating function for car, truck_gf for truck
 moves_helper ::
-	(Char -> Char -> Char -> Bool) -> --Match car
-	(Char -> Char -> Char -> Char -> Bool) -> --Match truck
-	(Char -> Char -> Char -> [Char] -> [Char]) -> --Gen car
-	(Char -> Char -> Char -> Char -> [Char] -> [Char]) -> --Gen truck
+	(Char -> Char -> Char -> Bool) -> -- Car mf
+	(Char -> Char -> Char -> Char -> Bool) -> -- Truck mf
+	(Char -> Char -> Char -> [Char] -> [Char]) -> -- Car gf
+	(Char -> Char -> Char -> Char -> [Char] -> [Char]) -> -- Truck gf
 	[Char] -> --beginning
 	[Char] -> --string
 	[[Char]]
 moves_helper _ _ _ _ _ [] = []
-moves_helper car_mf truck_mf gen_car gen_truck beg (v:(w:(x:(y:z))))
-	-- Thank god it's only one move at a time
-	-- So like "[Car][Car <same as first>]-" should generate "-[Car][Car <same as first>]"
+moves_helper car_mf truck_mf car_gf truck_gf beg (v:(w:(x:(y:z))))
+	-- Check trucks first before cars so they don't get turned into cars
 	| truck_mf v w x y =
-		(beg ++ (gen_car v w x (y:z))) :
-			(moves_helper car_mf truck_mf gen_car gen_truck (beg ++ (v:(w:[x]))) (y:z) )
+		(beg ++ (truck_gf v w x y z)) :
+			(moves_helper car_mf truck_mf car_gf truck_gf (beg ++ (v:(w:[x]))) (y:z) )
 	| car_mf v w x =
-		(beg ++ (gen_car v w x (y:z))) :
-			(moves_helper car_mf truck_mf gen_car gen_truck (beg ++ (v:(w:[x]))) (y:z) )
+		(beg ++ (car_gf v w x (y:z))) :
+			(moves_helper car_mf truck_mf car_gf truck_gf (beg ++ (v:(w:[x]))) (y:z) )
 			
-	| otherwise = moves_helper car_mf truck_mf gen_car gen_truck (beg ++ [v]) (w:(x:(y:z)))
+	| otherwise = moves_helper car_mf truck_mf car_gf truck_gf (beg ++ [v]) (w:(x:(y:z)))
 	
-	
-moves_helper car_mf truck_mf gen_car gen_truck beg (v:(w:(x:y)))
+moves_helper car_mf truck_mf car_gf truck_gf beg (v:(w:(x:y)))
 	| car_mf v w x =
-		(beg ++ (gen_car v w x y)) :
-			(moves_helper car_mf truck_mf gen_car gen_truck (beg ++ (v:(w:[x]))) y)
+		(beg ++ (car_gf v w x y)) :
+			(moves_helper car_mf truck_mf car_gf truck_gf (beg ++ (v:(w:[x]))) y)
 			
-	| otherwise = moves_helper car_mf truck_mf gen_car gen_truck (beg ++ [v]) (w:(x:y))
+	| otherwise = moves_helper car_mf truck_mf car_gf truck_gf (beg ++ [v]) (w:(x:y))
+	
 moves_helper _ _ _ _ _ _ = []
 
 
