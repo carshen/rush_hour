@@ -1,4 +1,4 @@
-module Solver (Board, Line, generate_horizontal_moves, generate_vertical_moves) where
+module Solver (Board, Line, generate_moves, generate_horizontal_moves, generate_vertical_moves) where
 import Horiz 
 import Data.List
 
@@ -30,7 +30,14 @@ is_goal board = (special_car_at_goal (get_row board 3) (length (head board)))
 
 -- Takes a board and generates a list of boards 1 move away.
 generate_moves :: Board -> [Board]
-generate_moves board = (generate_vertical_moves board) ++ (generate_horizontal_moves board)
+generate_moves board =	generate_moves_helper board (generate_vertical_moves board) ++
+						generate_moves_helper board (generate_horizontal_moves board)
+
+-- If nothing can be done then generate_horizontal_moves will return the initial board;
+-- This function simply removes that board
+generate_moves_helper :: Board -> [Board] -> [Board]
+generate_moves_helper initialBoard (x:[]) = if x == initialBoard then [] else (x:[])
+generate_moves_helper _ boards = boards
 
 -- Takes a board and generates a list of boards where each board is a valid vertical move.
 generate_vertical_moves :: Board -> [Board]

@@ -130,7 +130,10 @@ tests_board = [(generate_horizontal_moves ["dd--dd-","ccc-ccc","ccc-aa-"],
 		"cccaa--"
 		]]
 	),
-	(generate_vertical_moves ["a--","a--","-cc"], [["---","a--","acc"]])
+	(generate_vertical_moves ["a--","a--","-cc"], [["---","a--","acc"]]),
+	(generate_moves ["a--","a--","acc"], []),
+	(generate_vertical_moves ["a--","a--","acc","-bb"], [["---","a--","acc","abb"]]),
+	(generate_moves ["a--","a--","acc","-bb"], [["---","a--","acc","abb"],["a--","a--","acc","bb-"]])
 	]
 	
 run_board :: [String]
