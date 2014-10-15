@@ -1,15 +1,15 @@
 import Solver
 import Horiz
 
-tests :: [([String],[String])]
+tests :: [(Board,Board)]
 
-e :: String -> [String]
+e :: String -> Board
 e = moves_horiz
 
-f :: String -> [String]
+f :: String -> Board
 f = moves_right
 
-g :: String -> [String]
+g :: String -> Board
 g = moves_left
 
 tests = [
@@ -48,8 +48,13 @@ tests = [
 	(g "-aa-bb-cc-dd", ["aa--bb-cc-dd","-aabb--cc-dd","-aa-bbcc--dd", "-aa-bb-ccdd-"])
 	]
 	
-run_tests :: [([String],[String])] -> [String]
+run_tests :: [(Board,Board)] -> Board
 run_tests list = map (\(x) -> if (fst x) == (snd x) then "Pass" else "Fail") list
 
-runall :: [String]
-runall = run_tests tests  
+runall :: Board
+runall = run_tests tests
+
+tests_whole :: [([Board],[Board])]
+tests::whole = [
+	(horizontal_moves_helper ["dd--dd-","ccc-ccc","ccc-aa-"], [["-dd-dd-","-cccccc","-cccaa-"],["-dd-dd-","-cccccc","ccc--aa"],["-dd-dd-","-cccccc","cccaa--"],["-dd-dd-","cccccc-","-cccaa-"],["-dd-dd-","cccccc-","ccc--aa"],["-dd-dd-","cccccc-","cccaa--"],["dd---dd","-cccccc","-cccaa-"],["dd---dd","-cccccc","ccc--aa"],["dd---dd","-cccccc","cccaa--"],["dd---dd","cccccc-","-cccaa-"],["dd---dd","cccccc-","ccc--aa"],["dd---dd","cccccc-","cccaa--"],["dd-dd--","-cccccc","-cccaa-"],["dd-dd--","-cccccc","ccc--aa"],["dd-dd--","-cccccc","cccaa--"],["dd-dd--","cccccc-","-cccaa-"],["dd-dd--","cccccc-","ccc--aa"],["dd-dd--","cccccc-","cccaa--"]])
+]
