@@ -47,35 +47,67 @@ is_car '-'	= False
 is_car _	= True
 
 moves_horiz :: [Char] -> [[Char]]
-moves_horiz chars = (moves_right chars) ++ (moves_left chars)
+moves_horiz chars = (moves_right chars)
+-- ++ (moves_left chars)
 	
 --Get the possible moves to the right on one horizontal line
 -- "AA-" -> "-AA"
 moves_right :: [Char] -> [[Char]]
 moves_right arr = moves_helper
-		(\ w x y -> (w == x) && (is_car w) && (is_car x) && y == '-')
-		(\ w x y z -> (y:(w:(x:z))))
-		""
-		arr
-	
---Get the possible moves to the left on one horizontal line
--- "-AA" -> "AA-"
-moves_left :: [Char] -> [[Char]]
-moves_left arr = moves_helper
-		(\ w x y -> (x == y) && (is_car x) && (is_car y) && w == '-')
-		(\ w x y z -> (x:(y:(w:z))))
+		-- Car matching
+		(\ v w x ->
+			-- Check if first 2 are equal, cars, and 3rd is empty
+			(v == w) && (is_car v) && (is_car w) && x == '-'
+		)
+		-- Truck matching (should be done before car)
+		(\ v w x y ->
+			-- Check if first 2 are equal, cars, and 3rd is empty
+			(v == w) && (w == x) && (is_car v) && (is_car w) && (is_car x) && y == '-'
+		)
+		-- Car generation
+		(\ v w x rest ->
+			-- Compose empty with the 2 car chars and the rest of the list
+			(x:(v:(w:rest)))
+		)
+		-- Truck generation
+		(\ v w x y rest ->
+			-- Compose empty with the 3 car chars and the rest of the list
+			(y:(v:(w:(x:rest))))
+		)
 		""
 		arr
 
-moves_helper :: (Char -> Char -> Char -> Bool) -> (Char -> Char -> Char -> [Char] -> [Char]) -> [Char] -> [Char] -> [[Char]]
-moves_helper _ _ _ [] = []
-moves_helper match_fun gen_fun beg (w:(x:(y:z)))
+-- mf = matching function for car, truck_mf for truck
+moves_helper ::
+	(Char -> Char -> Char -> Bool) -> --Match car
+	(Char -> Char -> Char -> Char -> Bool) -> --Match truck
+	(Char -> Char -> Char -> [Char] -> [Char]) -> --Gen car
+	(Char -> Char -> Char -> Char -> [Char] -> [Char]) -> --Gen truck
+	[Char] -> --beginning
+	[Char] -> --string
+	[[Char]]
+moves_helper _ _ _ _ _ [] = []
+moves_helper car_mf truck_mf gen_car gen_truck beg (v:(w:(x:(y:z))))
 	-- Thank god it's only one move at a time
 	-- So like "[Car][Car <same as first>]-" should generate "-[Car][Car <same as first>]"
-	| match_fun w x y =
-		(beg ++ (gen_fun w x y z)) : (moves_helper match_fun gen_fun (beg ++ (w:(x:[y]))) z)
-	| otherwise = moves_helper match_fun gen_fun (beg ++ [w]) (x:(y:z))
-moves_helper _ _ _ _ = []
+	| truck_mf v w x y =
+		(beg ++ (gen_car v w x (y:z))) :
+			(moves_helper car_mf truck_mf gen_car gen_truck (beg ++ (v:(w:[x]))) (y:z) )
+	| car_mf v w x =
+		(beg ++ (gen_car v w x (y:z))) :
+			(moves_helper car_mf truck_mf gen_car gen_truck (beg ++ (v:(w:[x]))) (y:z) )
+			
+	| otherwise = moves_helper car_mf truck_mf gen_car gen_truck (beg ++ [v]) (w:(x:(y:z)))
+	
+	
+moves_helper car_mf truck_mf gen_car gen_truck beg (v:(w:(x:y)))
+	| car_mf v w x =
+		(beg ++ (gen_car v w x y)) :
+			(moves_helper car_mf truck_mf gen_car gen_truck (beg ++ (v:(w:[x]))) y)
+			
+	| otherwise = moves_helper car_mf truck_mf gen_car gen_truck (beg ++ [v]) (w:(x:y))
+moves_helper _ _ _ _ _ _ = []
+
 
 -- Misc. helpers
 -- Return the nth row of the board.
