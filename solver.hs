@@ -1,4 +1,4 @@
-module Solver (pat3_match) where
+module Solver (moves_horiz, moves_right) where
 
 -- Rush Hour
 
@@ -45,17 +45,37 @@ drop_last (x:xs)
 is_car :: Char -> Bool
 is_car '-'	= False
 is_car _	= True
+
+moves_horiz :: [Char] -> [[Char]]
+moves_horiz chars = (moves_right chars) ++ (moves_left chars)
 	
-pat3_match :: [Char] -> [[Char]]
-pat3_match arr = pat3_match_helper "" arr
+--Get the possible moves to the right on one horizontal line
+-- "AA-" -> "-AA"
+moves_right :: [Char] -> [[Char]]
+moves_right arr = moves_helper
+		(\ w x y -> (w == x) && (is_car w) && (is_car x) && y == '-')
+		(\ w x y z -> (y:(w:(x:z))))
+		""
+		arr
 	
-pat3_match_helper :: [Char] -> [Char] -> [[Char]]
-pat3_match_helper _ [] = []
-pat3_match_helper beg (x:(y:z))
-	| null z	= []
-	| (x == y) &&(is_car x) && (is_car y) && (head z) == '-'	= (beg ++ (head z):(x:(y:(tail z)))) : (pat3_match_helper (beg ++ (x:(y:[(head z)]))) (tail z))
-	| otherwise = pat3_match_helper (beg ++ [x]) (y:z)
-pat3_match_helper _ _ = []
+--Get the possible moves to the left on one horizontal line
+-- "-AA" -> "AA-"
+moves_left :: [Char] -> [[Char]]
+moves_left arr = moves_helper
+		(\ w x y -> (x == y) && (is_car x) && (is_car y) && w == '-')
+		(\ w x y z -> (x:(y:(w:z))))
+		""
+		arr
+
+moves_helper :: (Char -> Char -> Char -> Bool) -> (Char -> Char -> Char -> [Char] -> [Char]) -> [Char] -> [Char] -> [[Char]]
+moves_helper _ _ _ [] = []
+moves_helper match_fun gen_fun beg (w:(x:(y:z)))
+	-- Thank god it's only one move at a time
+	-- So like "[Car][Car <same as first>]-" should generate "-[Car][Car <same as first>]"
+	| match_fun w x y =
+		(beg ++ (gen_fun w x y z)) : (moves_helper match_fun gen_fun (beg ++ (w:(x:[y]))) z)
+	| otherwise = moves_helper match_fun gen_fun (beg ++ [w]) (x:(y:z))
+moves_helper _ _ _ _ = []
 
 -- Misc. helpers
 -- Return the nth row of the board.
