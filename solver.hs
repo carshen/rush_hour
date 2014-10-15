@@ -1,5 +1,5 @@
-module Solver where
-import Horiz
+module Solver (Board, Line, generate_horizontal_moves) where
+import Horiz 
 
 -- Rush Hour
 
@@ -36,37 +36,27 @@ generate_vertical_moves :: Board -> [Board]
 generate_vertical_moves board = [board]
 
 -- Takes a board and generates a list of boards where each board is a valid horizontal move.
--- O(2^(nm)) where n is number of lines m is length of line
-
--- Prepend a line to a board
-prepend_to_board :: Board -> Line -> Board
-prepend_to_board board line = line: board
-
 generate_horizontal_moves :: Board -> [Board]
 generate_horizontal_moves [] = []
-generate_horizontal_moves x = horizontal_moves_helper x
-
-horizontal_moves_helper :: Board -> [Board]
-horizontal_moves_helper [] = []
-horizontal_moves_helper (line:[])
+generate_horizontal_moves (line:[])
 	| null line_moves = [[line]]
 	| otherwise = map (\line -> [line]) line_moves
 	where line_moves = moves_horiz line
 	
-horizontal_moves_helper (line:(next_line:rest)) 
- 	| null line_moves = map (\ board -> prepend_to_board board line) next_boards
+generate_horizontal_moves (line:(next_line:rest)) 
+ 	| null line_moves = map (\ board -> line:board) next_boards
 	| otherwise =
 		concat
 		(
-		map
+			map
 			(\ line ->
-				map (\ board -> prepend_to_board board line) next_boards
+				map (\ board -> line:board) next_boards
 			)
-		line_moves
+			line_moves
 		)
  	where
  		line_moves = moves_horiz line
- 		next_boards = horizontal_moves_helper (next_line:rest)
+ 		next_boards = generate_horizontal_moves (next_line:rest)
 		
 -- Misc. helpers
 -- Return the nth row of the board.

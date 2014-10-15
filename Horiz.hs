@@ -96,6 +96,7 @@ moves_helper car_mf truck_mf car_gf truck_gf beg (v:(w:(x:(y:z))))
 	| otherwise = moves_helper car_mf truck_mf car_gf truck_gf (beg ++ [v]) (w:(x:(y:z)))
 	
 moves_helper car_mf truck_mf car_gf truck_gf beg (v:(w:(x:y)))
+	-- For size < 4 list
 	| car_mf v w x =
 		(beg ++ (car_gf v w x y)) :
 			(moves_helper car_mf truck_mf car_gf truck_gf (beg ++ (v:(w:[x]))) y)
