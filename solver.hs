@@ -1,5 +1,6 @@
-module Solver (Board, Line, generate_horizontal_moves) where
+module Solver (Board, Line, generate_horizontal_moves, generate_vertical_moves) where
 import Horiz 
+import Data.List
 
 -- Rush Hour
 
@@ -33,7 +34,7 @@ generate_moves board = (generate_vertical_moves board) ++ (generate_horizontal_m
 
 -- Takes a board and generates a list of boards where each board is a valid vertical move.
 generate_vertical_moves :: Board -> [Board]
-generate_vertical_moves board = [board]
+generate_vertical_moves board = map (\ rotated_board -> transpose rotated_board) (generate_horizontal_moves (transpose board))
 
 -- Takes a board and generates a list of boards where each board is a valid horizontal move.
 generate_horizontal_moves :: Board -> [Board]
