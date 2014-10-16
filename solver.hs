@@ -11,6 +11,9 @@ import Data.List
 type Board = [String]
 type Line = String
 
+pretty board = mapM_ putStrLn board
+pretty_board boards = mapM_ pretty boards
+
 rush_hour :: Board -> [Board]
 rush_hour init_state = reverse(solver [init_state] [])
 
@@ -19,7 +22,7 @@ solver :: [Board] -> [Board] -> [Board]
 solver unexplored path
 	| null unexplored		= []
 	| elem (head unexplored) path	= solver (tail unexplored) path
-	| is_goal (head unexplored)	= ((head unexplored):path)
+	| is_goal (head unexplored)	= (head unexplored):path
 	| (not (null result))		= result
 	| otherwise			= solver (tail unexplored) path
 	where result = solver (generate_moves (head unexplored)) ((head unexplored):path)
@@ -77,9 +80,9 @@ get_row board n
 special_car_at_goal :: String -> Int -> Bool
 special_car_at_goal row n
 	| (null (tail row))			= False
-	| n==2 && (special_car_at_head row)	= True
+	| n == 2 && (special_car_at_head row)	= True
 	| otherwise				= special_car_at_goal (tail row) (n-1)
 	
 -- Return True if special car at the head of the list where list size >= 2.
 special_car_at_head :: String -> Bool
-special_car_at_head row = (head row)=='X' && (head (tail row))=='X'
+special_car_at_head row = (head row) == 'X' && (head (tail row)) == 'X'
